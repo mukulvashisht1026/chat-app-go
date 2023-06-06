@@ -2,13 +2,18 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"io"
 
+	"mukulvashisht1026/chat-app-go/services"
+
+	"github.com/gorilla/mux"
 	"golang.org/x/net/websocket"
 )
 
+// code for web sockets
 type Server struct {
 	conns map[*websocket.Conn]bool
 }
@@ -42,9 +47,37 @@ func (s *Server) readLoop(ws *websocket.Conn) {
 	}
 }
 
+// code for rest API
+
+func homePage(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Homepage endpoint is hit")
+
+}
+
+func handleRequest() {
+	http.HandleFunc("/", homePage)
+	http.HandleFunc("/articles", services.AllArticles)
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+// code for rest API with gorilla MUX
+func handleRequestWithMux() {
+	myRouter := mux.NewRouter().StrictSlash(true)
+	myRouter.HandleFunc("/", homePage).Methods("GET")
+	myRouter.HandleFunc("/articles", services.AllArticles).Methods("POST")
+	log.Fatal(http.ListenAndServe(":8080", myRouter))
+}
+
 func main() {
-	fmt.Println("hello world")
-	server := NewServer()
-	http.Handle("/ws", websocket.Handler(server.handleWS))
-	http.ListenAndServe(":3000", nil)
+
+	// code for web sockets
+	/*
+		fmt.Println("hello world")
+		server := NewServer()
+		http.Handle("/ws", websocket.Handler(server.handleWS))
+		http.ListenAndServe(":3000", nil)
+	*/
+	// code for rest api
+	handleRequestWithMux()
+
 }
