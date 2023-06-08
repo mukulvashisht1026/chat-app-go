@@ -1,14 +1,13 @@
-package datastore
+package dal
 
 import "database/sql"
 
 type GenericDatabaseLayer interface {
 	Connect() error
 	Disconnect() error
-	Query(query string, args... interface{}) (*sql.Rows, error)
-	Insert(table string, values... interface{}) (int64, error)
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	Insert(table string, values ...interface{}) (int64, error)
 }
-
 
 type MysqlDatabaseLayer struct {
 	Db *sql.DB
@@ -30,17 +29,17 @@ func (m *MysqlDatabaseLayer) Disconnect() error {
 	return m.Db.Close()
 }
 
-func (m *MysqlDatabaseLayer) Query(query string, args... interface{}) (*sql.Rows, error) {
+func (m *MysqlDatabaseLayer) Query(query string, args ...interface{}) (*sql.Rows, error) {
 	return m.Db.Query(query, args...)
 }
 
-func (m *MysqlDatabaseLayer) Insert(table string, values... interface{}) (int64, error) {
+func (m *MysqlDatabaseLayer) Insert(table string, values ...interface{}) (int64, error) {
 	stmt, err := m.Db.Prepare("INSERT INTO " + table + " VALUES (?)")
 	if err != nil {
 		return 0, err
 	}
 	defer stmt.Close()
-	
+
 	result, err := stmt.Exec(values...)
 	if err != nil {
 		return 0, err
